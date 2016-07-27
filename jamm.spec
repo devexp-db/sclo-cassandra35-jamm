@@ -1,41 +1,20 @@
 %{?scl:%scl_package jamm}
 %{!?scl:%global pkg_name %{name}}
 
-%{?scl:%global mvn_scl    rh-maven33}
-%{?scl:%global java_scls  rh-java-common %mvn_scl}
-%{?scl:%global build_scls %mvn_scl %scl}
-
-%{?scl:
-%global scl_enable() \
-        scl enable %** - <<'_SCL_EOF' \
-        set -x
-%global scl_disable() _SCL_EOF
-}
-
 %global githash 1708ca44f7eb3addb66551a15b6b74672e87286a
 
 Name:          %{?scl_prefix}jamm
 Version:       0.3.1
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Java Agent for Memory Measurements
 License:       ASL 2.0
 Url:           https://github.com/jbellis/%{pkg_name}/
 Source0:       https://github.com/jbellis/%{pkg_name}/archive/%{githash}/%{pkg_name}-%{githash}.tar.gz
 
-BuildRequires: %{?scl:%mvn_scl-}maven-local
+BuildRequires: %{?scl_mvn_prefix}maven-local
 BuildRequires: mvn(junit:junit)
-BuildRequires: %{?scl:%mvn_scl-}mvn(org.sonatype.oss:oss-parent:pom:)
-%{?scl:BuildRequires: %scl_name-build}
+BuildRequires: %{?scl_mvn_prefix}mvn(org.sonatype.oss:oss-parent:pom:)
 %{?scl:Requires: %scl_runtime}
-
-%if ! 0%{?rhel}
-# no bash-completion for RHEL
-%global bash_completion 1
-%endif
-
-%if 0%{?bash_completion}
-BuildRequires: bash-completion pkgconfig
-%endif
 
 BuildArch:     noarch
 
@@ -51,7 +30,7 @@ Summary:       Javadoc for %{name}
 This package contains javadoc for %{name}.
 
 %prep
-%{?scl:%scl_enable %build_scls}
+%{?scl_enable}
 %setup -q -n %{pkg_name}-%{githash}
 
 %pom_xpath_inject pom:manifestEntries "<Agent-Class>org.github.jamm.MemoryMeter</Agent-Class>"
@@ -78,17 +57,17 @@ sed -i 's|assertEquals("Deep size of one-character String"|//assertEquals("Deep 
 
 %mvn_file : %{pkg_name}
 %mvn_alias com.github.jbellis: com.github.stephenc:
-%{?scl:%scl_disable}
+%{?scl_disable}
 
 %build
-%{?scl:%scl_enable  %build_scls}
+%{?scl_enable}
 %mvn_build
-%{?scl:%scl_disable}
+%{?scl_disable}
 
 %install
-%{?scl:%scl_enable  %build_scls}
+%{?scl_enable}
 %mvn_install
-%{?scl:%scl_disable}
+%{?scl_disable}
 
 %files -f .mfiles
 %doc README.txt
@@ -98,6 +77,9 @@ sed -i 's|assertEquals("Deep size of one-character String"|//assertEquals("Deep 
 %license license.txt
 
 %changelog
+* Wed Jul 27 2016 Tomas Repik <trepik@redhat.com> - 0.3.1-3
+- scl conversion
+
 * Tue Jun 21 2016 gil cattaneo <puntogil@libero.it> 0.3.1-2
 - fix jar plugin task
 
