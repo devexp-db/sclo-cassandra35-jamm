@@ -3,20 +3,20 @@
 
 %global githash 1708ca44f7eb3addb66551a15b6b74672e87286a
 
-Name:          %{?scl_prefix}jamm
-Version:       0.3.1
-Release:       3%{?dist}
-Summary:       Java Agent for Memory Measurements
-License:       ASL 2.0
-Url:           https://github.com/jbellis/%{pkg_name}/
-Source0:       https://github.com/jbellis/%{pkg_name}/archive/%{githash}/%{pkg_name}-%{githash}.tar.gz
+Name:		%{?scl_prefix}jamm
+Version:	0.3.1
+Release:	4%{?dist}
+Summary:	Java Agent for Memory Measurements
+License:	ASL 2.0
+Url:		https://github.com/jbellis/%{pkg_name}/
+Source0:	https://github.com/jbellis/%{pkg_name}/archive/%{githash}/%{pkg_name}-%{githash}.tar.gz
 
-BuildRequires: %{?scl_mvn_prefix}maven-local
-BuildRequires: mvn(junit:junit)
-BuildRequires: %{?scl_mvn_prefix}mvn(org.sonatype.oss:oss-parent:pom:)
+BuildRequires:	%{?scl_prefix_maven}maven-local
+BuildRequires:	%{?scl_prefix_maven}mvn(org.sonatype.oss:oss-parent:pom:)
+BuildRequires:	%{?scl_prefix_java_common}junit
 %{?scl:Requires: %scl_runtime}
 
-BuildArch:     noarch
+BuildArch:	noarch
 
 %description
 Jamm provides MemoryMeter, a java agent to
@@ -24,15 +24,15 @@ measure actual object memory use including
 JVM overhead.
 
 %package javadoc
-Summary:       Javadoc for %{name}
+Summary:	Javadoc for %{name}
 
 %description javadoc
 This package contains javadoc for %{name}.
 
 %prep
-%{?scl_enable}
 %setup -q -n %{pkg_name}-%{githash}
 
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %pom_xpath_inject pom:manifestEntries "<Agent-Class>org.github.jamm.MemoryMeter</Agent-Class>"
 
 # These tests fail on koji only https://github.com/jbellis/jamm/issues/21
@@ -57,17 +57,17 @@ sed -i 's|assertEquals("Deep size of one-character String"|//assertEquals("Deep 
 
 %mvn_file : %{pkg_name}
 %mvn_alias com.github.jbellis: com.github.stephenc:
-%{?scl_disable}
+%{?scl:EOF}
 
 %build
-%{?scl_enable}
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %mvn_build
-%{?scl_disable}
+%{?scl:EOF}
 
 %install
-%{?scl_enable}
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %mvn_install
-%{?scl_disable}
+%{?scl:EOF}
 
 %files -f .mfiles
 %doc README.txt
@@ -77,6 +77,9 @@ sed -i 's|assertEquals("Deep size of one-character String"|//assertEquals("Deep 
 %license license.txt
 
 %changelog
+* Wed Oct 12 2016 Tomas Repik <trepik@redhat.com> - 0.3.1-4
+- use standard SCL macros
+
 * Wed Jul 27 2016 Tomas Repik <trepik@redhat.com> - 0.3.1-3
 - scl conversion
 
